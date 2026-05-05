@@ -1,0 +1,563 @@
+<Page x:Class="DocMind.Views.Pages.Page_Duplicates"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:vm="clr-namespace:DocMind.ViewModels"
+      mc:Ignorable="d"
+      d:DesignHeight="900" d:DesignWidth="1100"
+      Title="Duplicate Files"
+      FontFamily="{StaticResource AppFont}">
+
+    <Page.DataContext>
+        <vm:DuplicatesViewModel/>
+    </Page.DataContext>
+
+    <Page.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+
+        <!-- Filter tab pill -->
+        <Style x:Key="FilterTab" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
+            <Setter Property="BorderThickness" Value="0,0,0,2"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="Padding" Value="18,8"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontFamily" Value="{StaticResource AppFont}"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Root" Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Root" Property="Background" Value="{DynamicResource SurfaceElevatedBrush}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Active filter tab -->
+        <Style x:Key="FilterTabActive" TargetType="Button" BasedOn="{StaticResource FilterTab}">
+            <Setter Property="Foreground" Value="{DynamicResource AccentBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+
+        <!-- Red danger button -->
+        <Style x:Key="DangerButton" TargetType="Button">
+            <Setter Property="Background" Value="#DC2626"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="16,8"/>
+            <Setter Property="FontFamily" Value="{StaticResource AppFont}"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Root" Background="{TemplateBinding Background}"
+                                CornerRadius="8" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Root" Property="Background" Value="#EF4444"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Root" Property="Background" Value="#B91C1C"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="Root" Property="Background" Value="#3A1A1A"/>
+                                <Setter Property="Foreground" Value="#6B3A3A"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Small ghost button -->
+        <Style x:Key="SmallGhost" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderDefaultBrush}"/>
+            <Setter Property="Padding" Value="12,6"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontFamily" Value="{StaticResource AppFont}"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Root" Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="6" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Root" Property="Background" Value="{DynamicResource SurfaceElevatedBrush}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Expand arrow button -->
+        <Style x:Key="ExpandButton" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Width" Value="32"/>
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Root" Background="{TemplateBinding Background}"
+                                CornerRadius="6">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Root" Property="Background" Value="{DynamicResource SurfaceElevatedBrush}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <!-- Group List Template -->
+        <DataTemplate x:Key="DuplicateGroupTemplate">
+            <!-- GROUP CARD -->
+            <Border Margin="0,0,0,16" CornerRadius="12"
+                    Background="{DynamicResource SurfaceCardBrush}"
+                    BorderBrush="{DynamicResource BorderDefaultBrush}"
+                    BorderThickness="1">
+
+                <StackPanel>
+                    <!-- ── COLLAPSED HEADER (always visible) ── -->
+                    <Grid Margin="20,16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Badge: EXACT or NEAR MATCH -->
+                        <Border Grid.Column="0" CornerRadius="4" Padding="8,3"
+                                Margin="0,0,14,0" VerticalAlignment="Center">
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Setter Property="Background" Value="#3B1717"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsNear}" Value="True">
+                                            <Setter Property="Background" Value="#2D2200"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+                            <TextBlock Text="{Binding BadgeLabel}" FontSize="10"
+                                       FontWeight="Bold">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Foreground" Value="#EF4444"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsNear}" Value="True">
+                                                <Setter Property="Foreground" Value="#F59E0B"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </Border>
+
+                        <!-- Group label + info -->
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding GroupLabel}" FontSize="14"
+                                       FontWeight="SemiBold"
+                                       Foreground="{DynamicResource TextPrimaryBrush}"/>
+                            <TextBlock Margin="0,3,0,0" FontSize="12"
+                                       Foreground="{DynamicResource TextSecondaryBrush}">
+                                <Run Text="{Binding Files.Count, Mode=OneWay}"/>
+                                <Run Text=" files  •  "/>
+                                <Run Text="{Binding FileSizeLabel, Mode=OneWay}"/>
+                                <Run Text=" each  •  Expand to review"/>
+                            </TextBlock>
+                        </StackPanel>
+
+                        <!-- Similarity badge (Near only) -->
+                        <Border Grid.Column="2" CornerRadius="6"
+                                Background="{DynamicResource BorderSubtleBrush}"
+                                Padding="10,4" Margin="0,0,12,0"
+                                Visibility="{Binding IsNear, Converter={StaticResource BoolToVis}}"
+                                VerticalAlignment="Center">
+                            <TextBlock Text="{Binding SimilarityLabel}" FontSize="12"
+                                       Foreground="#F59E0B" FontWeight="SemiBold"/>
+                        </Border>
+
+                        <!-- Expand/collapse arrow -->
+                        <Button Grid.Column="3" Style="{StaticResource ExpandButton}"
+                                Command="{Binding DataContext.ToggleExpandCommand, RelativeSource={RelativeSource AncestorType=Page}}"
+                                CommandParameter="{Binding}"
+                                VerticalAlignment="Center">
+                            <TextBlock FontSize="14"
+                                       Foreground="{DynamicResource TextSecondaryBrush}">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Text" Value="▼"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsExpanded}" Value="True">
+                                                <Setter Property="Text" Value="▲"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </Button>
+                    </Grid>
+
+                    <!-- ── EXPANDED CONTENT ── -->
+                    <StackPanel Visibility="{Binding IsExpanded, Converter={StaticResource BoolToVis}}">
+
+                        <!-- Separator -->
+                        <Border Height="1" Background="{DynamicResource BorderDefaultBrush}"
+                                Margin="20,0"/>
+
+                        <!-- File rows -->
+                        <ItemsControl ItemsSource="{Binding Files}" Margin="20,12,20,0">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Margin="0,0,0,8" CornerRadius="8"
+                                            Padding="14,12"
+                                            BorderThickness="1">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Setter Property="Background" Value="{DynamicResource SurfaceElevatedBrush}"/>
+                                                <Setter Property="BorderBrush" Value="{DynamicResource BorderDefaultBrush}"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsRecommendedKeep}" Value="True">
+                                                        <Setter Property="Background" Value="#0D2010"/>
+                                                        <Setter Property="BorderBrush" Value="#166534"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding IsSelectedForDeletion}" Value="True">
+                                                        <Setter Property="Background" Value="#1A0D0D"/>
+                                                        <Setter Property="BorderBrush" Value="#7F1D1D"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <!-- Checkbox -->
+                                            <CheckBox Grid.Column="0"
+                                                      IsChecked="{Binding IsSelectedForDeletion, Mode=TwoWay}"
+                                                      IsEnabled="{Binding IsRecommendedKeep, Converter={x:Static vm:InverseBoolConverter.Instance}}"
+                                                      VerticalAlignment="Center" Margin="0,0,12,0"
+                                                      Checked="OnFileCheckChanged"
+                                                      Unchecked="OnFileCheckChanged"/>
+
+                                            <!-- File icon -->
+                                            <TextBlock Grid.Column="1" Text="📄" FontSize="22"
+                                                       VerticalAlignment="Center" Margin="0,0,12,0"/>
+
+                                            <!-- Path info -->
+                                            <StackPanel Grid.Column="2" VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding FileName}" FontSize="13"
+                                                           FontWeight="SemiBold"
+                                                           Foreground="{DynamicResource TextPrimaryBrush}"
+                                                           TextTrimming="CharacterEllipsis"/>
+                                                <TextBlock Text="{Binding FilePath}" FontSize="11"
+                                                           Foreground="{DynamicResource TextTertiaryBrush}"
+                                                           TextTrimming="CharacterEllipsis"
+                                                           Margin="0,2,0,0"/>
+                                            </StackPanel>
+
+                                            <!-- Size + date -->
+                                            <StackPanel Grid.Column="3" VerticalAlignment="Center"
+                                                        Margin="16,0" HorizontalAlignment="Right">
+                                                <TextBlock Text="{Binding FileSizeLabel}" FontSize="12"
+                                                           Foreground="{DynamicResource TextSecondaryBrush}"
+                                                           HorizontalAlignment="Right"/>
+                                                <TextBlock Text="{Binding LastModified}" FontSize="11"
+                                                           Foreground="{DynamicResource TextTertiaryBrush}"
+                                                           HorizontalAlignment="Right" Margin="0,2,0,0"/>
+                                            </StackPanel>
+
+                                            <!-- KEEP badge -->
+                                            <Border Grid.Column="4" CornerRadius="5"
+                                                    Background="#14532D" Padding="8,3"
+                                                    VerticalAlignment="Center"
+                                                    Visibility="{Binding IsRecommendedKeep, Converter={StaticResource BoolToVis}}">
+                                                <TextBlock Text="KEEP" FontSize="10"
+                                                           FontWeight="Bold" Foreground="#22C55E"/>
+                                            </Border>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+
+                        <!-- Side-by-side preview (Near-Match only) -->
+                        <Border Margin="20,4,20,0" CornerRadius="8"
+                                Background="{DynamicResource SurfaceElevatedBrush}"
+                                BorderBrush="{DynamicResource BorderDefaultBrush}"
+                                BorderThickness="1" Padding="16"
+                                Visibility="{Binding IsNear, Converter={StaticResource BoolToVis}}">
+                            <StackPanel>
+                                <TextBlock Text="TEXT PREVIEW" FontSize="11" FontWeight="SemiBold"
+                                           Foreground="{DynamicResource TextTertiaryBrush}"
+                                           Margin="0,0,0,10"/>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="1"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <!-- Left excerpt -->
+                                    <StackPanel Grid.Column="0">
+                                        <TextBlock Text="{Binding Files[0].FileName}"
+                                                   FontSize="11" FontWeight="SemiBold"
+                                                   Foreground="{DynamicResource AccentBrush}"
+                                                   Margin="0,0,0,6"
+                                                   TextTrimming="CharacterEllipsis"/>
+                                        <TextBlock Text="{Binding PreviewLeft}"
+                                                   FontSize="12" TextWrapping="Wrap"
+                                                   Foreground="{DynamicResource TextSecondaryBrush}"
+                                                   LineHeight="20"/>
+                                    </StackPanel>
+
+                                    <!-- Divider -->
+                                    <Border Grid.Column="1"
+                                            Background="{DynamicResource BorderDefaultBrush}"
+                                            Margin="12,0"/>
+
+                                    <!-- Right excerpt -->
+                                    <StackPanel Grid.Column="2">
+                                        <TextBlock Text="{Binding Files[1].FileName}"
+                                                   FontSize="11" FontWeight="SemiBold"
+                                                   Foreground="#F59E0B"
+                                                   Margin="0,0,0,6"
+                                                   TextTrimming="CharacterEllipsis"/>
+                                        <TextBlock Text="{Binding PreviewRight}"
+                                                   FontSize="12" TextWrapping="Wrap"
+                                                   Foreground="{DynamicResource TextSecondaryBrush}"
+                                                   LineHeight="20"/>
+                                    </StackPanel>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Group action row -->
+                        <Border Margin="20,12,20,16" CornerRadius="8"
+                                Background="{DynamicResource SurfaceElevatedBrush}"
+                                Padding="14,10">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <Button Grid.Column="0" Content="Select All Duplicates"
+                                        Style="{StaticResource SmallGhost}" Margin="0,0,8,0"
+                                        Command="{Binding DataContext.SelectAllDupesCommand, RelativeSource={RelativeSource AncestorType=Page}}"
+                                        CommandParameter="{Binding}"/>
+
+                                <Button Grid.Column="1" Content="🗑  Delete Selected"
+                                        Style="{StaticResource DangerButton}" Margin="0,0,8,0"
+                                        Command="{Binding DataContext.DeleteGroupSelectedCommand, RelativeSource={RelativeSource AncestorType=Page}}"
+                                        CommandParameter="{Binding}"/>
+
+                                <Button Grid.Column="3" Content="Skip Group"
+                                        Style="{StaticResource SmallGhost}"
+                                        Command="{Binding DataContext.SkipGroupCommand, RelativeSource={RelativeSource AncestorType=Page}}"
+                                        CommandParameter="{Binding}"/>
+                            </Grid>
+                        </Border>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </DataTemplate>
+    </Page.Resources>
+
+    <Page.Triggers>
+        <EventTrigger RoutedEvent="Page.Loaded">
+            <BeginStoryboard Storyboard="{StaticResource PageFadeIn}"/>
+        </EventTrigger>
+    </Page.Triggers>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>  <!-- Top bar -->
+            <RowDefinition Height="Auto"/>  <!-- Filter tabs -->
+            <RowDefinition Height="Auto"/>  <!-- Warning banner -->
+            <RowDefinition Height="*"/>     <!-- Groups list -->
+            <RowDefinition Height="Auto"/>  <!-- Bottom bar -->
+        </Grid.RowDefinitions>
+
+        <!-- ═══════════════ TOP BAR ═══════════════ -->
+        <Border Grid.Row="0" Background="{DynamicResource TopBarBackgroundBrush}"
+                BorderBrush="{DynamicResource BorderDefaultBrush}" BorderThickness="0,0,0,1"
+                Padding="32,20">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                    <TextBlock Text="Duplicate Files" FontSize="22" FontWeight="Bold"
+                               Foreground="{DynamicResource TextPrimaryBrush}"/>
+                    <TextBlock Margin="0,4,0,0" FontSize="13"
+                               Foreground="{DynamicResource TextSecondaryBrush}">
+                        <Run Text="{Binding TotalGroups, Mode=OneWay}"/>
+                        <Run Text=" duplicate groups found  —  "/>
+                        <Run Text="{Binding RecoverableLabel, Mode=OneWay}"/>
+                    </TextBlock>
+                </StackPanel>
+
+                <Button Grid.Column="1" Content="⟳  Scan for Duplicates"
+                        Style="{StaticResource PrimaryButton}" Height="38" Padding="20,0"
+                        Command="{Binding ScanCommand}"/>
+            </Grid>
+        </Border>
+
+        <!-- ═══════════════ FILTER TABS ═══════════════ -->
+        <Border Grid.Row="1" Background="{DynamicResource TopBarBackgroundBrush}"
+                BorderBrush="{DynamicResource BorderDefaultBrush}" BorderThickness="0,0,0,1"
+                Padding="24,0">
+            <StackPanel Orientation="Horizontal">
+                <Button Command="{Binding FilterAllCommand}">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource FilterTab}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ActiveFilter}" Value="All">
+                                    <Setter Property="Foreground" Value="{DynamicResource AccentBrush}"/>
+                                    <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
+                                    <Setter Property="FontWeight" Value="SemiBold"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                    <TextBlock>
+                        <Run Text="All  ("/>
+                        <Run Text="{Binding CountAll, Mode=OneWay}"/>
+                        <Run Text=")"/>
+                    </TextBlock>
+                </Button>
+                <Button Command="{Binding FilterExactCommand}">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource FilterTab}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ActiveFilter}" Value="Exact">
+                                    <Setter Property="Foreground" Value="{DynamicResource AccentBrush}"/>
+                                    <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
+                                    <Setter Property="FontWeight" Value="SemiBold"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                    <TextBlock>
+                        <Run Text="Exact Duplicates  ("/>
+                        <Run Text="{Binding CountExact, Mode=OneWay}"/>
+                        <Run Text=")"/>
+                    </TextBlock>
+                </Button>
+                <Button Command="{Binding FilterNearCommand}">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource FilterTab}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ActiveFilter}" Value="Near">
+                                    <Setter Property="Foreground" Value="{DynamicResource AccentBrush}"/>
+                                    <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
+                                    <Setter Property="FontWeight" Value="SemiBold"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                    <TextBlock>
+                        <Run Text="Near-Duplicates  ("/>
+                        <Run Text="{Binding CountNear, Mode=OneWay}"/>
+                        <Run Text=")"/>
+                    </TextBlock>
+                </Button>
+            </StackPanel>
+        </Border>
+
+        <!-- ═══════════════ WARNING BANNER ═══════════════ -->
+        <Border Grid.Row="2" Background="#2D2200"
+                BorderBrush="#78490A" BorderThickness="0,0,0,1"
+                Padding="32,12">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <TextBlock Text="⚠️" FontSize="15" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                <TextBlock FontSize="13" Foreground="#F59E0B" VerticalAlignment="Center">
+                    <Run FontWeight="SemiBold" Text="Deleted files cannot be recovered."/>
+                    <Run Text="  Review carefully before deleting."/>
+                </TextBlock>
+            </StackPanel>
+        </Border>
+
+        <!-- ═══════════════ GROUPS LIST ═══════════════ -->
+        <ScrollViewer Grid.Row="3" Style="{StaticResource SlimScrollViewer}"
+                      Padding="32,24,32,8">
+            <StackPanel>
+                <ItemsControl ItemsSource="{Binding ExactGroups}"
+                              ItemTemplate="{StaticResource DuplicateGroupTemplate}"
+                              Visibility="{Binding ShowExactSection, Converter={StaticResource BoolToVis}}"/>
+
+                <ItemsControl ItemsSource="{Binding NearGroups}"
+                              ItemTemplate="{StaticResource DuplicateGroupTemplate}"
+                              Visibility="{Binding ShowNearSection, Converter={StaticResource BoolToVis}}"/>
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- ═══════════════ BOTTOM BAR ═══════════════ -->
+        <Border Grid.Row="4" Background="{DynamicResource TopBarBackgroundBrush}"
+                BorderBrush="{DynamicResource BorderDefaultBrush}" BorderThickness="0,1,0,0"
+                Padding="32,16">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0" Text="{Binding BottomBarLabel}"
+                           Foreground="{DynamicResource TextSecondaryBrush}"
+                           FontSize="13" VerticalAlignment="Center"/>
+
+                <Button Grid.Column="1" Content="🗑  Delete All Selected"
+                        Style="{StaticResource DangerButton}" Padding="20,10"
+                        IsEnabled="{Binding HasSelection}"
+                        Command="{Binding DeleteAllSelectedCommand}"/>
+            </Grid>
+        </Border>
+    </Grid>
+</Page>

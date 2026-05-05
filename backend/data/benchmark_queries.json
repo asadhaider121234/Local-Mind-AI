@@ -1,0 +1,117 @@
+[
+  {
+    "query": "What is the project roadmap for DocMind?",
+    "expected_source": "project_plan.txt",
+    "category": "Technical"
+  },
+  {
+    "query": "How is the database schema initialized?",
+    "expected_source": "database_schema.py",
+    "category": "Technical"
+  },
+  {
+    "query": "What is the quarterly revenue for Q1 2026?",
+    "expected_source": "financial_report.txt",
+    "category": "Financial"
+  },
+  {
+    "query": "What was the electricity bill in March?",
+    "expected_source": "Expense_Tracker_Month1.xlsx",
+    "category": "Financial"
+  },
+  {
+    "query": "What are the grading criteria for CS301?",
+    "expected_source": "CS301_Assignment_1.docx",
+    "category": "Academic"
+  },
+  {
+    "query": "When does the non-disclosure agreement expire?",
+    "expected_source": "NDA_Contract_2023.pdf",
+    "category": "Legal"
+  },
+  {
+    "query": "Which function handles database connections?",
+    "expected_source": "db_connector.py",
+    "category": "Technical"
+  },
+  {
+    "query": "When is the birthday party scheduled?",
+    "expected_source": "birthday_invite.jpg",
+    "category": "Personal"
+  },
+  {
+    "query": "What is the total tax due for Q1 2024?",
+    "expected_source": "Tax_Return_Q1_2024.pdf",
+    "category": "Financial"
+  },
+  {
+    "query": "Who are the authors of the deep learning paper?",
+    "expected_source": "Deep_Learning_Survey.pdf",
+    "category": "Academic"
+  },
+  {
+    "query": "What is the penalty for early lease termination?",
+    "expected_source": "Apartment_Lease_Agreement.docx",
+    "category": "Legal"
+  },
+  {
+    "query": "Where is the main navigation bar defined?",
+    "expected_source": "index.html",
+    "category": "Technical"
+  },
+  {
+    "query": "What ingredients are needed for the lasagna recipe?",
+    "expected_source": "Grandmas_Recipes.docx",
+    "category": "Personal"
+  },
+  {
+    "query": "How much was spent on groceries last month?",
+    "expected_source": "Bank_Statement_Oct.csv",
+    "category": "Financial"
+  },
+  {
+    "query": "What is the average test score for section A?",
+    "expected_source": "Class_Grades_Fall.xlsx",
+    "category": "Academic"
+  },
+  {
+    "query": "Is subletting allowed under this contract?",
+    "expected_source": "Sublet_Agreement.pdf",
+    "category": "Legal"
+  },
+  {
+    "query": "How is the user authentication token validated?",
+    "expected_source": "authMiddleware.js",
+    "category": "Technical"
+  },
+  {
+    "query": "How is memory deallocation handled in the engine?",
+    "expected_source": "PhysicsEngine.cpp",
+    "category": "Technical"
+  },
+  {
+    "query": "What is the total amount on the restaurant receipt?",
+    "expected_source": "dinner_receipt.png",
+    "category": "Financial"
+  },
+  {
+    "query": "What is the hypothesis of the biology experiment?",
+    "expected_source": "Bio_Lab_Report.pdf",
+    "category": "Academic"
+  },
+  {
+    "query": "Which design pattern is used for the user repository?",
+    "expected_source": "UserRepositoryImpl.java",
+    "category": "Technical"
+  },
+  {
+    "query": "What is the timeout configuration for the API?",
+    "expected_source": "config.json",
+    "category": "Technical"
+  },
+  {
+    "query": "What time is the dentist appointment?",
+    "expected_source": "Medical_Appointment.pdf",
+    "category": "Personal"
+  }
+]
