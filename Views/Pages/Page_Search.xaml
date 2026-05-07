@@ -311,7 +311,53 @@
                                 BorderBrush="{DynamicResource AccentBrush}" 
                                 BorderThickness="4,0,0,0" CornerRadius="4,8,8,4" Padding="20" Margin="0,0,0,24">
                             <StackPanel>
-                                <TextBlock Text="AI ANSWER" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource AccentBrush}" Margin="0,0,0,12"/>
+                                <Grid Margin="0,0,0,12">
+                                    <TextBlock Text="AI ANSWER" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource AccentBrush}" VerticalAlignment="Center"/>
+                                    <Button x:Name="CopyAnswerButton"
+                                            HorizontalAlignment="Right"
+                                            Click="CopyAnswer_Click"
+                                            Padding="10,4"
+                                            Cursor="Hand"
+                                            ToolTip="Copy answer to clipboard">
+                                        <Button.Style>
+                                            <Style TargetType="Button">
+                                                <Setter Property="Background" Value="{DynamicResource SurfaceCardBrush}"/>
+                                                <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
+                                                <Setter Property="BorderBrush" Value="{DynamicResource BorderDefaultBrush}"/>
+                                                <Setter Property="BorderThickness" Value="1"/>
+                                                <Setter Property="FontSize" Value="11"/>
+                                                <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+                                                <Setter Property="Template">
+                                                    <Setter.Value>
+                                                        <ControlTemplate TargetType="Button">
+                                                            <Border x:Name="Root"
+                                                                    Background="{TemplateBinding Background}"
+                                                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                                                    CornerRadius="6"
+                                                                    Padding="{TemplateBinding Padding}">
+                                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                            </Border>
+                                                            <ControlTemplate.Triggers>
+                                                                <Trigger Property="IsMouseOver" Value="True">
+                                                                    <Setter TargetName="Root" Property="Background" Value="{DynamicResource SurfaceElevatedBrush}"/>
+                                                                    <Setter TargetName="Root" Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
+                                                                </Trigger>
+                                                                <Trigger Property="IsPressed" Value="True">
+                                                                    <Setter TargetName="Root" Property="Background" Value="{DynamicResource AccentSubtleBrush}"/>
+                                                                </Trigger>
+                                                            </ControlTemplate.Triggers>
+                                                        </ControlTemplate>
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </Style>
+                                        </Button.Style>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock x:Name="CopyIcon" Text="📋" FontSize="12" Margin="0,0,4,0"/>
+                                            <TextBlock x:Name="CopyLabel" Text="Copy" FontSize="11"/>
+                                        </StackPanel>
+                                    </Button>
+                                </Grid>
                                 <TextBlock Text="{Binding CurrentAnswer.AnswerText}" FontSize="15" Foreground="{DynamicResource TextPrimaryBrush}" TextWrapping="Wrap" LineHeight="24" Margin="0,0,0,16"/>
                                 
                                 <TextBlock Text="Sources used:" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,8"/>

@@ -2,6 +2,8 @@ using System.Collections.Specialized;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
+using System.Threading.Tasks;
 using DocMind.ViewModels;
 
 namespace DocMind.Views.Pages;
@@ -45,4 +47,37 @@ public partial class Page_Search : Page
             }
         }
     }
+
+    private async void CopyAnswer_Click(object sender, RoutedEventArgs e)
+    {
+        if (DataContext is not SearchViewModel vm) return;
+
+        var answerText = vm.CurrentAnswer?.AnswerText;
+        if (string.IsNullOrWhiteSpace(answerText)) return;
+
+        try
+        {
+            Clipboard.SetText(answerText);
+        }
+        catch
+        {
+            // Clipboard may be locked by another process — silently ignore
+            return;
+        }
+
+        // Visual feedback: swap to "✓ Copied!" briefly
+        CopyIcon.Text = "✓";
+        CopyIcon.Foreground = new SolidColorBrush(Color.FromRgb(34, 197, 94)); // green
+        CopyLabel.Text = "Copied!";
+        CopyLabel.Foreground = new SolidColorBrush(Color.FromRgb(34, 197, 94));
+
+        await Task.Delay(1500);
+
+        // Revert to original look
+        CopyIcon.Text = "📋";
+        CopyIcon.ClearValue(System.Windows.Controls.TextBlock.ForegroundProperty);
+        CopyLabel.Text = "Copy";
+        CopyLabel.ClearValue(System.Windows.Controls.TextBlock.ForegroundProperty);
+    }
 }
+

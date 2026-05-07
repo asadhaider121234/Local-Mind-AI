@@ -9,6 +9,9 @@
         Height="800" Width="1280"
         MinHeight="700" MinWidth="1100"
         WindowStartupLocation="CenterScreen"
+        WindowState="Maximized"
+        WindowStyle="None"
+        AllowsTransparency="False"
         Background="{DynamicResource WindowBackgroundBrush}"
         Foreground="{DynamicResource TextPrimaryBrush}"
         FontFamily="{StaticResource AppFont}">
@@ -26,6 +29,17 @@
     </WindowChrome.WindowChrome>
 
     <Grid>
+        <Grid.Style>
+            <Style TargetType="Grid">
+                <Setter Property="Margin" Value="0"/>
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding WindowState, RelativeSource={RelativeSource AncestorType=Window}}" Value="Maximized">
+                        <Setter Property="Margin" Value="8"/>
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+        </Grid.Style>
+        
         <Grid.RowDefinitions>
             <RowDefinition Height="40"/>
             <RowDefinition Height="Auto"/>
@@ -168,7 +182,10 @@
                 </Grid>
 
                 <!-- Page Frame -->
-                <Frame Grid.Row="1" x:Name="MainFrame" NavigationUIVisibility="Hidden" Margin="0" ClipToBounds="True"/>
+                <Frame Grid.Row="1" x:Name="MainFrame" NavigationUIVisibility="Hidden" 
+                       Margin="0" ClipToBounds="True"
+                       VerticalAlignment="Stretch"
+                       HorizontalAlignment="Stretch"/>
             </Grid>
         </Grid>
     </Grid>

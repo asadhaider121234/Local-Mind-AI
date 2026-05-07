@@ -79,7 +79,9 @@
         <local:EnumToBooleanConverter x:Key="EnumToBool"/>
     </Page.Resources>
 
-    <Grid Background="{DynamicResource WindowBackgroundBrush}">
+    <Grid Background="{DynamicResource WindowBackgroundBrush}"
+          VerticalAlignment="Stretch"
+          HorizontalAlignment="Stretch">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/> <!-- Title -->
             <RowDefinition Height="*"/>    <!-- Settings Scroll -->
@@ -353,34 +355,33 @@
                                 HorizontalAlignment="Left" Command="{Binding TestConnectionCommand}"/>
                     </StackPanel>
                 </Border>
+                <!-- BOTTOM ACTIONS (Moved inside ScrollViewer) -->
+                <Border Background="Transparent" 
+                        BorderBrush="{DynamicResource BorderDefaultBrush}" BorderThickness="0,1,0,0"
+                        Padding="0,20,0,40" Margin="0,16,0,0">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <Button Content="Reset to Defaults" Style="{StaticResource GhostButton}" 
+                                Command="{Binding ResetDefaultsCommand}"/>
+                        
+                        <!-- Toast Notification -->
+                        <Border Grid.Column="1" Background="#0D2010" BorderBrush="#166534" BorderThickness="1" 
+                                CornerRadius="6" Padding="12,6" HorizontalAlignment="Center" 
+                                Visibility="{Binding ShowSavedToast, Converter={StaticResource BoolToVis}}">
+                            <TextBlock Text="Settings saved ✓" Foreground="#22C55E" FontSize="13" FontWeight="SemiBold"/>
+                        </Border>
+
+                        <Button Grid.Column="2" Content="Save Settings" Style="{StaticResource PrimaryButton}" 
+                                Width="200" Command="{Binding SaveSettingsCommand}"/>
+                    </Grid>
+                </Border>
 
             </StackPanel>
         </ScrollViewer>
-
-        <!-- BOTTOM ACTIONS -->
-        <Border Grid.Row="2" Background="{DynamicResource TopBarBackgroundBrush}" 
-                BorderBrush="{DynamicResource BorderDefaultBrush}" BorderThickness="0,1,0,0"
-                Padding="32,20">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-                
-                <Button Content="Reset to Defaults" Style="{StaticResource GhostButton}" 
-                        Command="{Binding ResetDefaultsCommand}"/>
-                
-                <!-- Toast Notification -->
-                <Border Grid.Column="1" Background="#0D2010" BorderBrush="#166534" BorderThickness="1" 
-                        CornerRadius="6" Padding="12,6" HorizontalAlignment="Center" 
-                        Visibility="{Binding ShowSavedToast, Converter={StaticResource BoolToVis}}">
-                    <TextBlock Text="Settings saved ✓" Foreground="#22C55E" FontSize="13" FontWeight="SemiBold"/>
-                </Border>
-
-                <Button Grid.Column="2" Content="Save Settings" Style="{StaticResource PrimaryButton}" 
-                        Width="200" Command="{Binding SaveSettingsCommand}"/>
-            </Grid>
-        </Border>
     </Grid>
 </Page>
