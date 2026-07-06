@@ -59,6 +59,7 @@ def run_full_evaluation(query_count=20, chunks=None, rag_engine=None) -> dict:
     Run query_count queries from benchmark dataset.
     For each query: run semantic search + keyword search.
     Compute P@5, R@5, MRR for both based on source filenames.
+    Also collects real per-step timing breakdowns from process_query().
     Return full results dict matching POST /evaluate response.
     """
     queries = load_benchmark_queries()[:query_count]
@@ -68,68 +69,60 @@ def run_full_evaluation(query_count=20, chunks=None, rag_engine=None) -> dict:
     sem_p5, sem_r5, sem_mrr = [], [], []
     kw_p5, kw_r5, kw_mrr = [], [], []
     latencies = []
+    embedding_times = []
+    retrieval_times = []
+    generation_times = []
     
     for q in queries:
         query_text = q.get("query", "")
         # expected_source is the filename
         expected = [q["expected_source"].lower()] if "expected_source" in q else []
-            
-        t0 = time.time()
-        # Semantic search
+
+        # Run full process_query() to get real timing breakdowns
         try:
+            result = rag_engine.process_query(query_text)
+            latencies.append(result.get("latency_ms", 0))
+            embedding_times.append(result.get("embedding_ms", 0))
+            retrieval_times.append(result.get("retrieval_ms", 0))
+            generation_times.append(result.get("generation_ms", 0))
+
+            # Re-use the chunks already retrieved for P@5/R@5/MRR
+            # (search_index was called inside process_query; run it again
+            #  for a clean filenames list without re-running the LLM)
             from modules.embedder import search_index
             sem_chunks = search_index(query_text, k=5)
             sem_retrieved_files = [os.path.basename(c.get("filename", "")).lower() for c in sem_chunks]
         except Exception:
             sem_retrieved_files = []
-            
-        latencies.append((time.time() - t0) * 1000)
-        
+            latencies.append(0)
+            embedding_times.append(0)
+            retrieval_times.append(0)
+            generation_times.append(0)
+
         sem_p5.append(precision_at_k(sem_retrieved_files, expected, k=5))
         sem_r5.append(recall_at_k(sem_retrieved_files, expected, k=5))
         sem_mrr.append(mean_reciprocal_rank(sem_retrieved_files, expected))
         
-        # Keyword search
+        # Keyword search (BM25) — unchanged
         kw_retrieved_files = [os.path.basename(f).lower() for f in run_keyword_search(query_text, chunks, k=5)]
         kw_p5.append(precision_at_k(kw_retrieved_files, expected, k=5))
         kw_r5.append(recall_at_k(kw_retrieved_files, expected, k=5))
         kw_mrr.append(mean_reciprocal_rank(kw_retrieved_files, expected))
         
-    def _mean(vals): return sum(vals)/len(vals) if vals else 0.0
+    def _mean(vals): return sum(vals) / len(vals) if vals else 0.0
+
+    avg_embedding   = round(_mean(embedding_times), 2)
+    avg_retrieval   = round(_mean(retrieval_times), 2)
+    avg_generation  = round(_mean(generation_times), 2)
 
     return {
         "precision_at_5":  round(_mean(sem_p5), 4),
         "recall_at_5":     round(_mean(sem_r5), 4),
         "mrr":             round(_mean(sem_mrr), 4),
-        "avg_latency_ms":  round(_mean(latencies)),
-        "embedding_ms":    0, 
-        "retrieval_ms":    0,
-        "generation_ms":   0,
-        "queries_run":     len(queries),
-        "semantic_vs_keyword": {
-            "semantic": {
-                "p5":  round(_mean(sem_p5), 4),
-                "r5":  round(_mean(sem_r5), 4),
-                "mrr": round(_mean(sem_mrr), 4),
-            },
-            "keyword": {
-                "p5":  round(_mean(kw_p5), 4),
-                "r5":  round(_mean(kw_r5), 4),
-                "mrr": round(_mean(kw_mrr), 4),
-            },
-        },
-    }
-        
-    def _mean(vals): return sum(vals)/len(vals) if vals else 0.0
-
-    return {
-        "precision_at_5":  round(_mean(sem_p5), 4),
-        "recall_at_5":     round(_mean(sem_r5), 4),
-        "mrr":             round(_mean(sem_mrr), 4),
-        "avg_latency_ms":  round(_mean(latencies)),
-        "embedding_ms":    0, # Stubbed for compatibility
-        "retrieval_ms":    0,
-        "generation_ms":   0,
+        "avg_latency_ms":  round(avg_embedding + avg_retrieval + avg_generation, 2),
+        "embedding_ms":    avg_embedding,
+        "retrieval_ms":    avg_retrieval,
+        "generation_ms":   avg_generation,
         "queries_run":     len(queries),
         "semantic_vs_keyword": {
             "semantic": {

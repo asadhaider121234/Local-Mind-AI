@@ -107,6 +107,11 @@ namespace DocMind.ViewModels
                     MRR = result.Mrr;
                     AvgLatency = result.AvgLatencyMs / 1000.0;
 
+                    // Real per-step timing from backend instrumentation
+                    EmbeddingTime  = result.EmbeddingMs  / 1000.0;
+                    RetrievalTime  = result.RetrievalMs  / 1000.0;
+                    GenerationTime = result.GenerationMs / 1000.0;
+
                     SemanticPrecision = result.PrecisionAt5;
                     SemanticRecall = result.RecallAt5;
                     SemanticMRR = result.Mrr;
@@ -118,6 +123,12 @@ namespace DocMind.ViewModels
                     LastRunText = DateTime.Now.ToString("dd MMM yyyy, h:mm tt");
 
                     // Notify UI of property changes
+                    OnPropertyChanged(nameof(EmbeddingTime));
+                    OnPropertyChanged(nameof(RetrievalTime));
+                    OnPropertyChanged(nameof(GenerationTime));
+                    OnPropertyChanged(nameof(EmbeddingWidth));
+                    OnPropertyChanged(nameof(RetrievalWidth));
+                    OnPropertyChanged(nameof(GenerationWidth));
                     OnPropertyChanged(nameof(SemanticPrecision));
                     OnPropertyChanged(nameof(SemanticRecall));
                     OnPropertyChanged(nameof(SemanticMRR));

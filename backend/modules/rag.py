@@ -181,47 +181,72 @@ def summarize(text: str) -> str:
         return f"Summarization failed: {e}"
 
 def process_query(query_text: str, file_path: str = None) -> dict:
-    t0 = time.time()
-    
+    t_total = time.time()
+
     # Check if we are querying an image specifically for VQA
     if file_path and any(file_path.lower().endswith(ext) for ext in ['.jpg', '.jpeg', '.png']):
         answer = answer_vqa(file_path, query_text)
-        latency = int((time.time() - t0) * 1000)
+        latency = int((time.time() - t_total) * 1000)
         return {
             "answer": answer.capitalize() + ".",
             "sources": [{"filename": os.path.basename(file_path), "page": 1, "excerpt": "Visual Analysis", "score": 1.0}],
-            "latency_ms": latency
+            "latency_ms": latency,
+            "embedding_ms": 0.0,
+            "retrieval_ms": 0.0,
+            "generation_ms": latency,
         }
 
-    # Standard RAG Path
+    # ── Step 1: Embed query ───────────────────────────────────────────────────
+    t0 = time.time()
+    from modules.embedder import _embedding_model
+    if _embedding_model is not None:
+        instruction = "Represent this sentence for searching relevant passages: "
+        _embedding_model.encode(
+            [instruction + query_text],
+            normalize_embeddings=True,
+            convert_to_numpy=True,
+        )
+    embedding_ms = (time.time() - t0) * 1000
+
+    # ── Step 2: FAISS retrieval ───────────────────────────────────────────────
+    t1 = time.time()
     chunks = search_index(query_text, k=5)
-    
+
     # Filter chunks if a specific file_path is requested
     if file_path:
-        # Normalize paths for comparison
         target_name = os.path.basename(file_path).lower()
         chunks = [c for c in chunks if os.path.basename(c.get("filename", "")).lower() == target_name]
+    retrieval_ms = (time.time() - t1) * 1000
 
     if not chunks:
-        latency = int((time.time() - t0) * 1000)
+        total_ms = int((time.time() - t_total) * 1000)
         return {
             "answer": "I could not find relevant information in the selected document." if file_path else "No relevant documents found for your query.",
             "sources": [],
-            "latency_ms": latency
+            "latency_ms": total_ms,
+            "embedding_ms": round(embedding_ms, 2),
+            "retrieval_ms": round(retrieval_ms, 2),
+            "generation_ms": 0.0,
         }
-        
+
+    # ── Step 3: LLM generation ────────────────────────────────────────────────
+    t2 = time.time()
     prompt = build_rag_prompt(query_text, chunks, is_filtered=(file_path is not None))
     answer = generate_answer(prompt)
-    
+    generation_ms = (time.time() - t2) * 1000
+
     is_grounded = hallucination_filter(answer, chunks)
     if not is_grounded and "I could not find" not in answer:
         answer = "I could not find a reliable answer to this in your documents."
-        
+
     citations = format_citations(chunks)
-    latency = int((time.time() - t0) * 1000)
-    
+    total_ms = int((time.time() - t_total) * 1000)
+
     return {
         "answer": answer,
         "sources": citations,
-        "latency_ms": latency
+        "latency_ms": total_ms,
+        "embedding_ms": round(embedding_ms, 2),
+        "retrieval_ms": round(retrieval_ms, 2),
+        "generation_ms": round(generation_ms, 2),
     }
