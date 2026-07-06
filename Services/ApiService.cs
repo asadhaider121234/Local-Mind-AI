@@ -30,8 +30,9 @@ namespace DocMind.Services
         {
             try
             {
-                // Health check uses a short dedicated timeout
-                using var cts = new System.Threading.CancellationTokenSource(TimeSpan.FromSeconds(5));
+                // Health check timeout — 10s gives headroom when the backend
+                // is busy (e.g. LLM inference in-flight on another thread).
+                using var cts = new System.Threading.CancellationTokenSource(TimeSpan.FromSeconds(10));
                 var response = await _http.GetAsync($"{BaseUrl}/health", cts.Token);
                 response.EnsureSuccessStatusCode();
                 return await response.Content.ReadFromJsonAsync<HealthResponse>();

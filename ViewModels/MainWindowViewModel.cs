@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using System.Windows.Input;
+using System.Windows.Threading;
 using DocMind.Models;
 using DocMind.Services;
 
@@ -14,6 +15,8 @@ public class MainWindowViewModel : BaseViewModel
     private IndexStatus _currentIndexStatus = IndexStatus.Ready;
     private bool _isDarkTheme;
     private bool _isBackendOffline;
+    private int _consecutiveFailures = 0;
+    private readonly DispatcherTimer _heartbeatTimer;
 
     public ObservableCollection<NavigationItem> NavItems { get; }
 
@@ -32,7 +35,8 @@ public class MainWindowViewModel : BaseViewModel
                 if (value != null)
                 {
                     NavigationService.Instance.Navigate(value.TargetPage);
-                    CheckBackendHealth();
+                    // Do NOT trigger a health check on every nav click —
+                    // the heartbeat timer handles this on a 15-second cadence.
                 }
             }
         }
@@ -98,17 +102,41 @@ public class MainWindowViewModel : BaseViewModel
         _selectedNavItem = initialItem;
         _selectedNavItem.IsSelected = true;
 
+        // Perform an immediate health check on launch
         CheckBackendHealth();
+
+        // Start a heartbeat timer — checks every 15 seconds.
+        // This means the banner will disappear automatically once
+        // the backend finishes starting up, without needing a nav click.
+        _heartbeatTimer = new DispatcherTimer
+        {
+            Interval = TimeSpan.FromSeconds(15)
+        };
+        _heartbeatTimer.Tick += (_, _) => CheckBackendHealth();
+        _heartbeatTimer.Start();
     }
 
     private async void CheckBackendHealth()
     {
         var health = await ApiService.Instance.CheckHealthAsync();
-        IsBackendOffline = health == null;
-        
+
         if (health != null)
         {
+            // Success — reset failure counter and mark online immediately
+            _consecutiveFailures = 0;
+            IsBackendOffline = false;
             CurrentIndexStatus = health.TotalChunks > 0 ? IndexStatus.Ready : IndexStatus.NotIndexed;
+        }
+        else
+        {
+            // Only show the offline banner after 2 consecutive failures.
+            // This prevents a single slow response (e.g. backend busy with LLM)
+            // from incorrectly flashing the "Backend offline" banner.
+            _consecutiveFailures++;
+            if (_consecutiveFailures >= 2)
+            {
+                IsBackendOffline = true;
+            }
         }
     }
 }
